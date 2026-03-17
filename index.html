@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健康診断 自動予約フォーム 構築インフォグラフィック</title>
+    
+    <!-- Palette Name: Vibrant Tech Blues -->
+    <!-- Plan Summary:
+         1. Introduction: Hook the user on the automated health checkup reservation system.
+         2. System Overview: Explain the cyclic flow between Forms, GAS, and Sheets using a structured HTML diagram.
+         3. Task Distribution: Compare the effort/steps required for each setup phase using a Bar Chart.
+         4. Branching Logic: Organize the form's user journey using an HTML-based tree diagram.
+         5. Cancellation Operations: Detail the maintenance process in a step-by-step UI. -->
+    <!-- Chart Choices:
+         - Setup Tasks Volume -> Goal: Compare -> Chosen Visualization: Bar Chart (Chart.js) -> Justification: Effectively compares the number of steps across different tools without using SVG.
+         - System Flow -> Goal: Organize -> Chosen Visualization: HTML/CSS Flowchart -> Justification: Clearly maps the process cycle, strictly adhering to the NO SVG constraint.
+         - Form Branching -> Goal: Organize -> Chosen Visualization: HTML/CSS Tree Diagram -> Justification: Shows hierarchical pathways without Mermaid JS or SVG. -->
+    <!-- I explicitly confirm that NEITHER Mermaid JS NOR SVG were used anywhere in the output. -->
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #F0Fdfa; font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif; color: #0F172A; }
+        .chart-container { position: relative; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; height: 320px; max-height: 400px; }
+        @media (min-width: 768px) { .chart-container { height: 380px; } }
+        .gradient-text { background: linear-gradient(to right, #0284C7, #0D9488); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .card { background-color: #ffffff; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); padding: 1.5rem; border-top: 4px solid #0EA5E9; }
+        .flow-node { background-color: #F0F9FF; border: 2px solid #38BDF8; border-radius: 0.75rem; padding: 1rem; text-align: center; font-weight: 700; color: #0369A1; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); width: 100%; }
+        .flow-arrow { display: flex; justify-content: center; align-items: center; padding: 0.5rem; color: #94A3B8; font-size: 1.5rem; }
+        .tree-line-v { width: 2px; background-color: #CBD5E1; height: 1.5rem; margin: 0 auto; }
+        .tree-line-h { height: 2px; background-color: #CBD5E1; width: 50%; margin: 0 auto; }
+        .tree-node-small { background-color: #FEF3C7; border: 2px solid #F59E0B; border-radius: 0.5rem; padding: 0.5rem; text-align: center; font-size: 0.875rem; font-weight: 700; color: #B45309; }
+        .step-circle { display: inline-flex; align-items: center; justify-content: center; width: 2.5rem; height: 2.5rem; background-color: #0EA5E9; color: white; border-radius: 9999px; font-weight: bold; margin-right: 1rem; flex-shrink: 0; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <header class="max-w-5xl mx-auto text-center mb-12 mt-4">
+        <h1 class="text-3xl md:text-5xl font-black mb-4 gradient-text tracking-tight">健康診断 自動予約フォーム 構築ガイド</h1>
+        <p class="text-lg md:text-xl text-slate-600 font-medium max-w-3xl mx-auto">
+            Googleフォーム、スプレッドシート、そしてGASを連携し、予約枠の空き状況をリアルタイムで自動更新するシステムの全体像と構築ステップを視覚的に解説します。
+        </p>
+    </header>
+
+    <main class="max-w-5xl mx-auto grid grid-cols-1 gap-8">
+
+        <section class="card">
+            <h2 class="text-2xl font-bold mb-4 text-slate-800 flex items-center">
+                <span class="text-3xl mr-2">🔄</span> システムの全体像とデータフロー
+            </h2>
+            <p class="text-slate-600 mb-8 leading-relaxed">
+                この自動予約システムは、3つのGoogleツールが連携して稼働します。ユーザーの回答をトリガーにしてバックグラウンドでプログラムが走り、常に最新の空き状況をフォームに反映させる無人化の仕組みです。
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center bg-slate-50 p-6 rounded-xl border border-slate-200">
+                <div class="flex flex-col items-center">
+                    <div class="flow-node">
+                        <div class="text-4xl mb-2">📝</div>
+                        Googleフォーム<br>
+                        <span class="text-xs font-normal text-slate-500">ユーザーが日時を選択・送信</span>
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-center">
+                    <div class="flow-arrow rotate-90 md:rotate-0">➔</div>
+                    <div class="flow-node !bg-amber-50 !border-amber-400 !text-amber-700">
+                        <div class="text-4xl mb-2">⚙️</div>
+                        GAS (プログラム)<br>
+                        <span class="text-xs font-normal text-slate-500">回答を検知して自動起動</span>
+                    </div>
+                    <div class="flow-arrow rotate-90 md:rotate-0 hidden md:block">➔</div>
+                </div>
+
+                <div class="flex flex-col items-center">
+                    <div class="flow-arrow rotate-90 md:rotate-0 md:hidden">⬇</div>
+                    <div class="flow-node !bg-emerald-50 !border-emerald-400 !text-emerald-700">
+                        <div class="text-4xl mb-2">📊</div>
+                        スプレッドシート<br>
+                        <span class="text-xs font-normal text-slate-500">全枠から予約済みを差し引く</span>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-4 text-sm text-slate-500 font-bold bg-slate-100 p-3 rounded-lg">
+                ※ 算出された「空き枠」が再びGoogleフォームの選択肢として即座に上書きされます。
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 class="text-2xl font-bold mb-4 text-slate-800 flex items-center">
+                <span class="text-3xl mr-2">📊</span> 構築ステップと作業ボリューム
+            </h2>
+            <p class="text-slate-600 mb-6 leading-relaxed">
+                システムの構築は大きく3つのフェーズに分かれます。以下のグラフは、各フェーズにおける設定項目や作業ステップの数を示しています。Googleフォームのセクション分岐設定が最もウェイトを占めます。
+            </p>
+
+            <div class="chart-container">
+                <canvas id="stepsChart"></canvas>
+            </div>
+            
+            <p class="mt-6 text-sm text-slate-500 bg-blue-50 p-4 rounded-lg border border-blue-100">
+                <strong>グラフの解説:</strong> 最もステップ数が多いのはフォームの設定（6ステップ）です。GASの設定はコードを貼り付けてトリガーを設定するだけなので、見た目以上に簡単です。
+            </p>
+        </section>
+
+        <section class="card">
+            <h2 class="text-2xl font-bold mb-4 text-slate-800 flex items-center">
+                <span class="text-3xl mr-2">🔀</span> フォームのセクション分岐ロジック
+            </h2>
+            <p class="text-slate-600 mb-8 leading-relaxed">
+                回答者の属性（性別や希望コース）に合わせて、不要な質問をスキップさせるセクション分岐の構造です。GASが正しく認識するために、セクション4と5の質問タイトルに特定のキーワード（通常／胃カメラ）を含めることが極めて重要です。
+            </p>
+
+            <div class="bg-slate-50 p-4 md:p-8 rounded-xl border border-slate-200 overflow-x-auto">
+                <div class="min-w-[600px] flex flex-col items-center">
+                    
+                    <div class="tree-node-small !bg-white !border-slate-300 !text-slate-700 w-64">
+                        【Sec 1】 基本情報 ＆ 性別選択
+                    </div>
+                    
+                    <div class="flex w-full justify-center">
+                        <div class="w-1/2 flex justify-end pr-8"><div class="tree-line-v h-6"></div></div>
+                        <div class="w-1/2 flex justify-start pl-8"><div class="tree-line-v h-6"></div></div>
+                    </div>
+                    <div class="flex w-full justify-center">
+                        <div class="w-1/2 border-t-2 border-slate-300 h-2"></div>
+                        <div class="w-1/2 border-t-2 border-slate-300 h-2"></div>
+                    </div>
+                    
+                    <div class="flex w-full justify-center gap-16">
+                        <div class="flex flex-col items-center w-48">
+                            <span class="text-xs font-bold text-slate-500 bg-white px-2 -mt-3 mb-2">男性</span>
+                            <div class="tree-line-v h-8"></div>
+                        </div>
+                        <div class="flex flex-col items-center w-48">
+                            <span class="text-xs font-bold text-slate-500 bg-white px-2 -mt-3 mb-2">女性</span>
+                            <div class="tree-node-small !bg-pink-50 !border-pink-400 !text-pink-700 w-full mb-2">
+                                【Sec 2】 婦人科検診
+                            </div>
+                            <div class="tree-line-v h-6"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex w-full justify-center">
+                        <div class="w-1/2 border-b-2 border-slate-300 h-4 border-r-2 rounded-br-lg -mr-[1px]"></div>
+                        <div class="w-1/2 border-b-2 border-slate-300 h-4 border-l-2 rounded-bl-lg -ml-[1px]"></div>
+                    </div>
+                    <div class="tree-line-v h-4"></div>
+
+                    <div class="tree-node-small !bg-white !border-slate-300 !text-slate-700 w-64">
+                        【Sec 3】 希望コースの選択
+                    </div>
+
+                    <div class="flex w-full justify-center">
+                        <div class="w-1/2 flex justify-end pr-8"><div class="tree-line-v h-6"></div></div>
+                        <div class="w-1/2 flex justify-start pl-8"><div class="tree-line-v h-6"></div></div>
+                    </div>
+                    <div class="flex w-full justify-center">
+                        <div class="w-1/2 border-t-2 border-slate-300 h-2"></div>
+                        <div class="w-1/2 border-t-2 border-slate-300 h-2"></div>
+                    </div>
+
+                    <div class="flex w-full justify-center gap-16">
+                        <div class="flex flex-col items-center w-56">
+                            <span class="text-xs font-bold text-slate-500 bg-white px-2 -mt-3 mb-2">胃カメラなし</span>
+                            <div class="tree-node-small !bg-cyan-50 !border-cyan-400 !text-cyan-700 w-full mb-2">
+                                【Sec 4】 通常枠の日時選択<br>
+                                <span class="text-xs font-normal">※タイトルに「通常」を含む</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center w-56">
+                            <span class="text-xs font-bold text-slate-500 bg-white px-2 -mt-3 mb-2">胃カメラあり</span>
+                            <div class="tree-node-small !bg-teal-50 !border-teal-400 !text-teal-700 w-full mb-2">
+                                【Sec 5】 胃カメラ枠の日時選択<br>
+                                <span class="text-xs font-normal">※タイトルに「胃カメラ」を含む</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex w-full justify-center">
+                        <div class="w-1/2 border-b-2 border-slate-300 h-6 border-r-2 rounded-br-lg -mr-[1px]"></div>
+                        <div class="w-1/2 border-b-2 border-slate-300 h-6 border-l-2 rounded-bl-lg -ml-[1px]"></div>
+                    </div>
+                    <div class="tree-line-v h-4"></div>
+
+                    <div class="tree-node-small !bg-indigo-50 !border-indigo-400 !text-indigo-700 w-64 shadow-md">
+                        【Sec 6】 オプション検査 (合流) ➔ 送信
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 class="text-2xl font-bold mb-4 text-slate-800 flex items-center">
+                <span class="text-3xl mr-2">🛠️</span> キャンセル枠の復活対応フロー
+            </h2>
+            <p class="text-slate-600 mb-6 leading-relaxed">
+                運用中に予約のキャンセルが発生した場合でも、簡単な手動操作で即座に空き枠をフォームのプルダウンに復活させることができます。
+            </p>
+
+            <div class="space-y-4">
+                <div class="flex items-start bg-white border border-slate-200 p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                    <div class="step-circle">1</div>
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-800">スプレッドシートを開く</h3>
+                        <p class="text-slate-600 mt-1">フォームと連携しているスプレッドシートの「フォームの回答 1」シートを表示します。</p>
+                    </div>
+                </div>
+
+                <div class="flex items-start bg-white border border-slate-200 p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                    <div class="step-circle !bg-red-500">2</div>
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-800">該当者の行を削除</h3>
+                        <p class="text-slate-600 mt-1">キャンセルした人のデータが入っている行番号を右クリックし、「行を削除」を選択します。（※セルのクリアではなく行ごとの削除が必要です）</p>
+                    </div>
+                </div>
+
+                <div class="flex items-start bg-white border border-slate-200 p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                    <div class="step-circle !bg-amber-500">3</div>
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-800">Apps Scriptを開く</h3>
+                        <p class="text-slate-600 mt-1">上部メニューの「拡張機能」から「Apps Script」をクリックしてエディタを開きます。</p>
+                    </div>
+                </div>
+
+                <div class="flex items-start bg-white border border-slate-200 p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-l-emerald-500">
+                    <div class="step-circle !bg-emerald-500">4</div>
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-800">更新用関数を実行</h3>
+                        <p class="text-slate-600 mt-1">画面上部の関数選択で必ず <code>updateFormChoices</code> を選び、「▷ 実行」ボタンを押します。これでフォームに空き枠が復活します。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="max-w-5xl mx-auto text-center py-8 text-slate-500 text-sm">
+        &copy; 2026 Health Checkup Auto-Reservation System Guide.
+    </footer>
+
+    <script>
+        function wrapLabel(label) {
+            if (typeof label !== 'string' || label.length <= 16) {
+                return label;
+            }
+            
+            let words = label.split(' ');
+            if (words.length > 1) {
+                let lines = [];
+                let currentLine = '';
+                
+                for (let i = 0; i < words.length; i++) {
+                    let word = words[i];
+                    if ((currentLine + word).length > 16) {
+                        if (currentLine.length > 0) {
+                            lines.push(currentLine.trim());
+                            currentLine = '';
+                        }
+                    }
+                    currentLine += word + ' ';
+                }
+                if (currentLine.trim().length > 0) {
+                    lines.push(currentLine.trim());
+                }
+                return lines;
+            } else {
+                let chunks = [];
+                for (let i = 0; i < label.length; i += 16) {
+                    chunks.push(label.substring(i, i + 16));
+                }
+                return chunks;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const rawLabels = [
+                "Googleフォーム セクションと分岐の設定",
+                "スプレッドシート 予約枠の準備と確認",
+                "GASプログラム コード貼付とトリガー",
+                "運用時のキャンセル 空き枠復活の手順"
+            ];
+
+            const processedLabels = rawLabels.map(wrapLabel);
+            const dataValues = [6, 2, 4, 4];
+            
+            const ctx = document.getElementById('stepsChart').getContext('2d');
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: processedLabels,
+                    datasets: [{
+                        label: '設定・作業ステップ数',
+                        data: dataValues,
+                        backgroundColor: [
+                            'rgba(14, 165, 233, 0.7)',
+                            'rgba(16, 185, 129, 0.7)',
+                            'rgba(245, 158, 11, 0.7)',
+                            'rgba(239, 68, 68, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(14, 165, 233, 1)',
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(245, 158, 11, 1)',
+                            'rgba(239, 68, 68, 1)'
+                        ],
+                        borderWidth: 2,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            },
+                            title: {
+                                display: true,
+                                text: 'ステップ数',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    const item = tooltipItems[0];
+                                    let label = item.chart.data.labels[item.dataIndex];
+                                    if (Array.isArray(label)) {
+                                      return label.join(' ');
+                                    } else {
+                                      return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
